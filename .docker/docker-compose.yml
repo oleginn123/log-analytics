@@ -1,0 +1,76 @@
+services:
+  nginx:
+    build:
+      context: ..
+      dockerfile: ./.docker/nginx/Dockerfile
+      args:
+        - NGINX_APP_UPSTREAM_CONTAINER=${NGINX_APP_UPSTREAM_CONTAINER}
+        - NGINX_APP_UPSTREAM_PORT=${NGINX_APP_UPSTREAM_PORT}
+    ports:
+      - "80:80"
+    volumes:
+      - ${APP_CODE_PATH_HOST}/public:/var/www/html/public
+    depends_on:
+      app:
+        condition: service_started
+
+  app:
+    build:
+      context: ..
+      dockerfile: .docker/app/Dockerfile
+      target: fpm_server
+      args:
+        APP_ENV: ${APP_ENV}
+        APP_PHP_EXTENSIONS: ${APP_PHP_EXTENSIONS}
+        OS_TYPE: ${OS_TYPE:-Unknown}
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    environment:
+      XDEBUG_MODE: '${XDEBUG_MODE:-off}'
+      XDEBUG_TRIGGER: '${XDEBUG_TRIGGER:-0}'
+      XDEBUG_CONFIG: "client_host=${XDEBUG_CLIENT_HOST}"
+      PHP_IDE_CONFIG: ${PHP_IDE_CONFIG}
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www/html
+    depends_on:
+      database:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: ..
+      dockerfile: .docker/app/Dockerfile
+      target: scheduler
+      args:
+        APP_PHP_EXTENSIONS: ${APP_PHP_EXTENSIONS}
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www/html
+    depends_on:
+      app:
+        condition: service_started
+
+  supervisor:
+    build:
+      context: ..
+      dockerfile: .docker/app/Dockerfile
+      target: supervisor
+      args:
+        APP_PHP_EXTENSIONS: ${APP_PHP_EXTENSIONS}
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www/html
+    depends_on:
+      app:
+        condition: service_started
+
+  database:
+    build:
+      dockerfile: database/Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      MYSQL_DATABASE: '${MYSQL_DATABASE}'
+      MYSQL_USER: '${MYSQL_USER}'
+      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+    volumes:
+      - ${DATA_PATH_HOST}/database:/var/lib/mysql
+    ports:
+      - '3307:3306'
