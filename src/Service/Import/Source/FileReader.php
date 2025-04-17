@@ -2,7 +2,6 @@
 
 namespace App\Service\Import\Source;
 
-use Generator;
 use IteratorAggregate;
 use Traversable;
 
@@ -23,7 +22,7 @@ class FileReader implements IteratorAggregate
         fseek($this->fileHandle, $this->offset);
 
         while (($line = fgets($this->fileHandle)) !== false
-            && $this->currentPosition - $this->offset < $this->pageSize
+            && $this->currentPosition - $this->offset < $this->pageSize * strlen($line)
         ) {
             $this->currentPosition += strlen($line);
 
@@ -39,5 +38,10 @@ class FileReader implements IteratorAggregate
     public function isEOF(): bool
     {
         return feof($this->fileHandle);
+    }
+
+    public function __destruct()
+    {
+        fclose($this->fileHandle);
     }
 }

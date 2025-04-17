@@ -21,7 +21,7 @@ class LogFile
     private ?string $temp_path = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $current_position = null;
+    private ?int $current_position = null;
 
     #[ORM\Column]
     private ?bool $is_eof = null;
@@ -55,12 +55,12 @@ class LogFile
         return $this;
     }
 
-    public function getCurrentPosition(): ?string
+    public function getCurrentPosition(): ?int
     {
         return $this->current_position;
     }
 
-    public function setCurrentPosition(string $current_position): static
+    public function setCurrentPosition(int $current_position): static
     {
         $this->current_position = $current_position;
 

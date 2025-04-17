@@ -39,7 +39,6 @@ class ImportLogsCommand extends Command
                 'Number of lines to process in one run.',
                 100
             )
-            ->addOption('sync', null, InputOption::VALUE_NONE, 'Is sync mode enabled.')
         ;
     }
 
@@ -48,20 +47,16 @@ class ImportLogsCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            if ($input->getOption('sync')) {
-                $importResult = $this->importer->import(
-                    $input->getOption('filePath'),
-                    $input->getOption('offset'),
-                    $input->getOption('pageSize')
-                );
+            $importResult = $this->importer->import(
+                $input->getOption('filePath'),
+                $input->getOption('offset'),
+                $input->getOption('pageSize')
+            );
 
-                if ($importResult->isSuccess()) {
-                    $io->success($importResult->getCount() . ' log entries imported into database.');
-                } else {
-                    $io->error('Unable to import log entries');
-                }
+            if ($importResult->isSuccess()) {
+                $io->success($importResult->getCount() . ' log entries imported into database.');
             } else {
-                // todo: to background
+                $io->error('Unable to import log entries');
             }
         } catch (\Exception $exception) {
             $io->error($exception->getMessage());
