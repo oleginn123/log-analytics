@@ -17,7 +17,7 @@ class LogEntry
     #[ORM\Column(length: 255)]
     private ?string $service_name = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $timestamp = null;
 
     #[ORM\Column(type: Types::TEXT)]
