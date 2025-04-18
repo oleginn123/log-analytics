@@ -30,7 +30,7 @@ class ImportLogsCommand extends Command
                 'offset',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Start position of reading log file.'
+                'Start position of reading log file. Used only for dev/debug purposes.'
             )
             ->addOption(
                 'pageSize',

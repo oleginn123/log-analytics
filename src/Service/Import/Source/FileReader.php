@@ -23,10 +23,12 @@ class FileReader implements IteratorAggregate
     {
         fseek($this->fileHandle, $this->offset);
 
+        $linesCounter = 1;
         while (($line = fgets($this->fileHandle)) !== false
-            && $this->currentPosition - $this->offset < $this->pageSize * strlen($line)
+            && $linesCounter <= $this->pageSize
         ) {
             $this->currentPosition += strlen($line);
+            $linesCounter++;
 
             yield $line;
         }
