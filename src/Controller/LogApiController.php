@@ -29,7 +29,7 @@ class LogApiController extends AbstractController
             );
         } catch (\Exception $exception) {
             return $this->json(
-                ['error' => $exception->getMessage()],
+                ['error' => 'Something went wrong while processing request. Please check logs.'],
                 500
             );
         }
