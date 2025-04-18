@@ -1,57 +1,37 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\LogEntry;
-use DateTimeImmutable;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\LogEntry\CountSearchCriteria;
+use App\Repository\LogEntryRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 class LogApiController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager
+        private readonly LogEntryRepository $repository
     ) {
     }
 
-    #[Route('/api/count')]
+    #[Route('/api/count', methods: ['GET'])]
     public function getCount(
-        #[MapQueryParameter] ?array $serviceNames = null,
-        #[MapQueryParameter] ?string $startDate = null,
-        #[MapQueryParameter] ?string $endDate = null,
+        #[MapQueryString(validationFailedStatusCode: 400)] CountSearchCriteria $criteria
+            = new CountSearchCriteria()
     ): Response {
-        $count = 0;
-
-        $logEntryRepository = $this->entityManager->getRepository(LogEntry::class);
-
         try {
-            $criteria = Criteria::create();
-            if ($serviceNames !== null) {
-                $criteria->andWhere(
-                    Criteria::expr()->in('service_name', $serviceNames)
-                );
-            }
-            if ($startDate !== null) {
-                $criteria->andWhere(
-                    Criteria::expr()->gte('timestamp', DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $startDate))
-                );
-            }
-            if ($endDate !== null) {
-                $criteria->andWhere(
-                    Criteria::expr()->lte('timestamp', DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $endDate))
-                );
-            }
-
-            $count = $logEntryRepository->matching($criteria)
-                ->count();
+            return $this->json(
+                ['counter' => $this->repository->getCount($criteria)]
+            );
         } catch (\Exception $exception) {
-            $this->json(['error' => $exception->getMessage()], 500);
+            return $this->json(
+                ['error' => $exception->getMessage()],
+                500
+            );
         }
-
-        return $this->json(['count' => $count]);
     }
 }

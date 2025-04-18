@@ -25,7 +25,7 @@ class ImportLogsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('filePath', null, InputOption::VALUE_OPTIONAL, 'Log file path')
+            ->addOption('filePath', null, InputOption::VALUE_REQUIRED, 'Log file path')
             ->addOption(
                 'offset',
                 null,
@@ -47,11 +47,23 @@ class ImportLogsCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $importResult = $this->importer->import(
-                $input->getOption('filePath'),
-                $input->getOption('offset'),
-                $input->getOption('pageSize')
-            );
+            $filePath = strval($input->getOption('filePath')); // @phpstan-ignore-line
+            if (empty($filePath)) {
+                $io->error('Please specify --filePath option');
+
+                return Command::FAILURE;
+            }
+
+            $pageSize = intval($input->getOption('pageSize')); // @phpstan-ignore-line
+            $offset = $input->getOption('offset');
+
+            $importResult = $offset === null
+                ? $this->importer->importNext($filePath, $pageSize)
+                : $this->importer->importPage(
+                    $filePath,
+                    intval($offset), // @phpstan-ignore-line
+                    $pageSize
+                );
 
             if ($importResult->isSuccess()) {
                 $io->success($importResult->getCount() . ' log entries imported into database.');
@@ -60,6 +72,8 @@ class ImportLogsCommand extends Command
             }
         } catch (\Exception $exception) {
             $io->error($exception->getMessage());
+
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;

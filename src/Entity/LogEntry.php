@@ -3,11 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\LogEntryRepository;
+use App\Service\Import\Log\LogEntryInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LogEntryRepository::class)]
-class LogEntry
+class LogEntry implements LogEntryInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

@@ -3,11 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\LogFileRepository;
+use App\Service\Import\Log\LogFileInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LogFileRepository::class)]
-class LogFile
+class LogFile implements LogFileInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

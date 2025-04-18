@@ -1,105 +1,137 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service\Import;
 
-use App\Entity\LogEntry;
-use App\Entity\LogFile;
+use App\Service\Import\Log\ConverterInterface;
+use App\Service\Import\Log\LogEntryPersistenceInterface;
+use App\Service\Import\Log\LogEntryRepositoryInterface;
+use App\Service\Import\Log\LogFileInterface;
+use App\Service\Import\Log\LogFileRepositoryInterface;
 use App\Service\Import\Source\FileManager;
 use App\Service\Import\Source\FileReader;
 use App\Service\Import\Source\Parser;
-use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
 class LogsImport implements LogsImportInterface
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ContainerBagInterface $params,
+        private readonly LogFileRepositoryInterface $fileRepository,
+        private readonly LogEntryRepositoryInterface $entryRepository,
+        private readonly LogEntryPersistenceInterface $persistence,
+        private readonly ConverterInterface $converter,
         private readonly FileManager $fileManager,
-        private readonly Parser $parser
+        private readonly Parser $parser,
+        private readonly LoggerInterface $logger
     ) {
     }
 
-    public function import(
-        ?string $filePath = null,
-        ?int $offset = null,
-        ?int $pageSize = null
+    public function importNext(
+        string $filePath,
+        int $pageSize = self::DEFAULT_PAGE_SIZE
     ): ImportResult {
-        $filePath = $this->resolveFilePath($filePath);
+        $file = $this->getFile($filePath);
 
-        $fileRepository = $this->entityManager->getRepository(LogFile::class);
-        $logFile = $fileRepository->findOneBy(['path' => $filePath]);
-        if ($logFile === null) {
-            $tmpFilePath = $this->fileManager->toTmp($filePath);
+        return $this->doImport($file, $file->getCurrentPosition(), $pageSize);
+    }
 
-            $logFile = new LogFile();
-            $logFile->setPath($filePath);
-            $logFile->setCurrentPosition(0);
-            $logFile->setTempPath($tmpFilePath);
-            $logFile->setIsEof(false);
+    public function importPage(
+        string $filePath,
+        int $offset,
+        int $pageSize = self::DEFAULT_PAGE_SIZE
+    ): ImportResult {
+        return $this->doImport(
+            $this->getFile($filePath),
+            $offset,
+            $pageSize,
+            false
+        );
+    }
 
-            $this->entityManager->persist($logFile);
-            $this->entityManager->flush();
-        }
-
-        if ($logFile->isEof()) {
-            $logFile->setTempPath(
-                $this->fileManager->toTmp($filePath)
+    private function doImport(
+        LogFileInterface $file,
+        int $offset,
+        int $pageSize = self::DEFAULT_PAGE_SIZE,
+        bool $isUpdateFileState = true
+    ): ImportResult {
+        if ($file->isEof()) {
+            $file->setTempPath(
+                $this->fileManager->toTmp($file->getPath())
             );
         }
 
-        if ($offset === null) {
-            $offset = $logFile->getCurrentPosition();
-        }
-
-        $handle = @fopen($logFile->getTempPath(), 'rb');
-        if ($handle === false) {
-            throw new RuntimeException('Could not open file ' . $logFile->getTempPath() . '.');
-        }
-
-        $reader = new FileReader($handle, $offset, $pageSize);
-        $logEntryRepository = $this->entityManager->getRepository(LogEntry::class);
-
-        $count = 0;
         try {
-            foreach ($reader as $line) {
-                $logEntry = $this->parser->parseLine($line);
-                if ($logEntry === null
-                    || $logEntryRepository->findOneBy(['timestamp' => $logEntry->getTimestamp()]) !== null
-                ) {
-                    continue;
-                }
+            $reader = $this->getReader($file, $offset, $pageSize);
 
-                $this->entityManager->persist($logEntry);
-                $count++;
+            $toCreate = $this->readNewEntries($reader);
 
-                if ($reader->isEOF()) {
-                    break;
-                }
+            if ($isUpdateFileState) {
+                $file->setCurrentPosition($reader->getCurrentPosition());
+                $file->setIsEof($reader->isEOF());
             }
-        } catch (\Exception $exception) {
+
+            $this->persistence->persist($file, $toCreate);
+        } catch (Exception $exception) {
+            $this->logger->error($exception->getMessage());
+
+            return new ImportResult(false);
         }
 
-        $logFile->setCurrentPosition($reader->getCurrentPosition());
-        $logFile->setIsEof($reader->isEOF());
-
-        $this->entityManager->persist($logFile);
-
-        $this->entityManager->flush();
-
-        return new ImportResult(true, $count);
+        return new ImportResult(true, count($toCreate));
     }
 
-    private function resolveFilePath(?string $filePath = null): string
+    private function getFile(string $filePath): LogFileInterface
     {
-        if ($filePath === null) {
-            $filePath = $this->params->get('app.import-logs.file-path');
-        }
-        if ($filePath === null) {
-            throw new \Exception('Unable to resolve log filePath.');
+        return $this->fileRepository->getByPathOrCreate(
+            $filePath,
+            function (LogFileInterface $file) use ($filePath) {
+                $file->setTempPath($this->fileManager->toTmp($filePath));
+
+                return $file;
+            }
+        );
+    }
+
+    /**
+     * @throws RuntimeException
+     */
+    private function getReader(
+        LogFileInterface $file,
+        int $offset,
+        int $pageSize = self::DEFAULT_PAGE_SIZE
+    ): FileReader {
+        $handle = @fopen($file->getTempPath(), 'rb');
+        if ($handle === false) {
+            throw new RuntimeException('Could not open file ' . $file->getTempPath() . '.');
         }
 
-        return $filePath;
+        return new FileReader($handle, $offset, $pageSize);
+    }
+
+    private function readNewEntries(FileReader $reader): array
+    {
+        $entries = [];
+        foreach ($reader as $line) {
+            $parsed = $this->parser->parseLine($line);
+            if ($parsed === null) {
+                continue;
+            }
+
+            $logEntry = $this->converter->convert($parsed);
+            if ($logEntry === null || $this->entryRepository->isExists($logEntry)) {
+                continue;
+            }
+
+            $entries[] = $logEntry;
+
+            if ($reader->isEOF()) {
+                break;
+            }
+        }
+
+        return $entries;
     }
 }
