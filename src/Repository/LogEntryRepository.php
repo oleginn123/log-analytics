@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\LogEntry;
 use App\Repository\LogEntry\CountSearchCriteria;
-use App\Service\Import\Log\LogEntryInterface;
+use App\Service\Import\Log\LogEntry as LogEntryDto;
 use App\Service\Import\Log\LogEntryRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -25,12 +25,7 @@ class LogEntryRepository extends ServiceEntityRepository implements LogEntryRepo
             ->count();
     }
 
-    public function newEntry(): LogEntryInterface
-    {
-        return new LogEntry();
-    }
-
-    public function isExists(LogEntryInterface $logEntry): bool
+    public function isExists(LogEntryDto $logEntry): bool
     {
         if ($logEntry->getTimestamp() === null) {
             return false;
@@ -40,12 +35,18 @@ class LogEntryRepository extends ServiceEntityRepository implements LogEntryRepo
     }
 
     /**
-     * @param LogEntryInterface[] $entries
+     * @param LogEntryDto[] $entries
      */
     public function createEntries(array $entries): void
     {
         foreach ($entries as $entry) {
-            $this->getEntityManager()->persist($entry);
+            $this->getEntityManager()->persist(
+                (new LogEntry())
+                    ->setServiceName($entry->getServiceName())
+                    ->setBody($entry->getBody())
+                    ->setTimestamp($entry->getTimestamp())
+                    ->setCode($entry->getCode())
+            );
         }
 
         $this->getEntityManager()->flush();

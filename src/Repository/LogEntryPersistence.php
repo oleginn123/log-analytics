@@ -2,9 +2,9 @@
 
 namespace App\Repository;
 
-use App\Service\Import\Log\LogEntryInterface;
+use App\Service\Import\Log\LogEntry as LogEntryDto;
 use App\Service\Import\Log\LogEntryPersistenceInterface;
-use App\Service\Import\Log\LogFileInterface;
+use App\Service\Import\Log\LogFile as LogFileDto;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -18,10 +18,10 @@ class LogEntryPersistence implements LogEntryPersistenceInterface
     }
 
     /**
-     * @param LogEntryInterface[] $entries
+     * @param LogEntryDto[] $entries
      * @throws Exception
      */
-    public function persist(LogFileInterface $file, array $entries): void
+    public function persist(LogFileDto $file, array $entries): void
     {
         $connection = $this->entityManager->getConnection();
 

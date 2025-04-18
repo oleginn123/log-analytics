@@ -9,5 +9,5 @@ interface ConverterInterface
     /**
      * @param string[] $lineData
      */
-    public function convert(array $lineData): ?LogEntryInterface;
+    public function convert(array $lineData): ?LogEntry;
 }

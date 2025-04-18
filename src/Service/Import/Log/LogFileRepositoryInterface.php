@@ -8,8 +8,8 @@ interface LogFileRepositoryInterface
 {
     public function getByPathOrCreate(
         string $path,
-        ?callable $modifyEntity = null
-    ): LogFileInterface;
+        ?callable $getTmpPathCallback = null
+    ): LogFile;
 
-    public function update(LogFileInterface $file): void;
+    public function update(LogFile $file): void;
 }

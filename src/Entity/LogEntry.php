@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\LogEntryRepository;
-use App\Service\Import\Log\LogEntryInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Index(name: 'idx_serviceName', columns: ['service_name'])]
+#[ORM\Index(name: 'idx_timestamp', columns: ['timestamp'])]
+#[ORM\Index(name: 'idx_code', columns: ['code'])]
 #[ORM\Entity(repositoryClass: LogEntryRepository::class)]
-class LogEntry implements LogEntryInterface
+class LogEntry
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

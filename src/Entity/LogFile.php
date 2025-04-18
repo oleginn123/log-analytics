@@ -3,12 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\LogFileRepository;
-use App\Service\Import\Log\LogFileInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LogFileRepository::class)]
-class LogFile implements LogFileInterface
+class LogFile
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,9 +31,9 @@ class LogFile implements LogFileInterface
         return $this->id;
     }
 
-    public function getPath(): string
+    public function getPath(): ?string
     {
-        return $this->path ?? '';
+        return $this->path;
     }
 
     public function setPath(string $path): static
@@ -44,9 +43,9 @@ class LogFile implements LogFileInterface
         return $this;
     }
 
-    public function getTempPath(): string
+    public function getTempPath(): ?string
     {
-        return $this->temp_path ?? '';
+        return $this->temp_path;
     }
 
     public function setTempPath(string $temp_path): static

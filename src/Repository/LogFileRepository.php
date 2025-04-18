@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\LogFile;
-use App\Service\Import\Log\LogFileInterface;
+use App\Service\Import\Log\LogFile as LogFileDto;
 use App\Service\Import\Log\LogFileRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -20,8 +20,8 @@ class LogFileRepository extends ServiceEntityRepository implements LogFileReposi
 
     public function getByPathOrCreate(
         string $path,
-        ?callable $modifyEntity = null
-    ): LogFileInterface {
+        ?callable $getTmpPathCallback = null
+    ): LogFileDto {
         $logFile = $this->findOneBy(['path' => $path]);
         if ($logFile === null) {
             $logFile = new LogFile();
@@ -29,20 +29,35 @@ class LogFileRepository extends ServiceEntityRepository implements LogFileReposi
             $logFile->setCurrentPosition(0);
             $logFile->setIsEof(false);
 
-            if ($modifyEntity !== null) {
-                $logFile = $modifyEntity($logFile);
+            if ($getTmpPathCallback !== null) {
+                $logFile->setTempPath($getTmpPathCallback($path));
             }
 
             $this->getEntityManager()->persist($logFile);
             $this->getEntityManager()->flush();
         }
 
-        return $logFile;
+        return new LogFileDto(
+            $logFile->getPath(),
+            $logFile->getTempPath(),
+            $logFile->getCurrentPosition(),
+            $logFile->isEof()
+        );
     }
 
-    public function update(LogFileInterface $file): void
+    public function update(LogFileDto $file): void
     {
-        $this->getEntityManager()->persist($file);
+        $logFile = $this->findOneBy(['path' => $file->getPath()]);
+        if ($logFile === null) {
+            throw new \Exception('LogFile entity with path = ' . $file->getPath() .  ' doesn\'t exists');
+        }
+
+        $logFile->setPath($file->getPath());
+        $logFile->setTempPath($file->getTempPath());
+        $logFile->setCurrentPosition($file->getCurrentPosition());
+        $logFile->setIsEof($file->isEof());
+
+        $this->getEntityManager()->persist($logFile);
         $this->getEntityManager()->flush();
     }
 }

@@ -32,3 +32,7 @@ bin/console log-analytics:import-logs --filePath=/var/www/html/import/logs.log
 
 ## Count API
 Count API endpoint available by url: `http://localhost/api/count`
+Example curl call:
+```shell
+curl --header 'Accept: application/json' 'http://localhost/api/count?serviceNames[]=USER-SERVICE&startDate=2018-08-17%2009%3A23%3A00&endDate=2018-08-17%2009%3A27%3A00&statusCode=201'
+```

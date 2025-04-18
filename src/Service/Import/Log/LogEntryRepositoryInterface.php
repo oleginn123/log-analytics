@@ -6,12 +6,10 @@ namespace App\Service\Import\Log;
 
 interface LogEntryRepositoryInterface
 {
-    public function newEntry(): LogEntryInterface;
-
-    public function isExists(LogEntryInterface $logEntry): bool;
+    public function isExists(LogEntry $logEntry): bool;
 
     /**
-     * @param LogEntryInterface[] $entries
+     * @param LogEntry[] $entries
      */
     public function createEntries(array $entries): void;
 }

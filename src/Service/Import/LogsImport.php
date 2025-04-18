@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Service\Import;
 
 use App\Service\Import\Log\ConverterInterface;
-use App\Service\Import\Log\LogEntryInterface;
+use App\Service\Import\Log\LogEntry;
 use App\Service\Import\Log\LogEntryPersistenceInterface;
 use App\Service\Import\Log\LogEntryRepositoryInterface;
-use App\Service\Import\Log\LogFileInterface;
+use App\Service\Import\Log\LogFile;
 use App\Service\Import\Log\LogFileRepositoryInterface;
 use App\Service\Import\Source\FileManager;
 use App\Service\Import\Source\FileReader;
@@ -57,7 +57,7 @@ class LogsImport implements LogsImportInterface
     }
 
     private function doImport(
-        LogFileInterface $file,
+        LogFile $file,
         int $offset,
         int $pageSize = self::DEFAULT_PAGE_SIZE,
         bool $isUpdateFileState = true
@@ -88,14 +88,12 @@ class LogsImport implements LogsImportInterface
         return new ImportResult(true, count($toCreate));
     }
 
-    private function getFile(string $filePath): LogFileInterface
+    private function getFile(string $filePath): LogFile
     {
         return $this->fileRepository->getByPathOrCreate(
             $filePath,
-            function (LogFileInterface $file) use ($filePath) {
-                $file->setTempPath($this->fileManager->toTmp($filePath));
-
-                return $file;
+            function (string $path) {
+                return $this->fileManager->toTmp($path);
             }
         );
     }
@@ -104,7 +102,7 @@ class LogsImport implements LogsImportInterface
      * @throws RuntimeException
      */
     private function getReader(
-        LogFileInterface $file,
+        LogFile $file,
         int $offset,
         int $pageSize = self::DEFAULT_PAGE_SIZE
     ): FileReader {
@@ -117,7 +115,7 @@ class LogsImport implements LogsImportInterface
     }
 
     /**
-     * @return LogEntryInterface[]
+     * @return LogEntry[]
      */
     private function readNewEntries(FileReader $reader): array
     {

@@ -10,28 +10,21 @@ class Converter implements ConverterInterface
 {
     private const LOG_DATE_TIME_FORMAT = 'd/M/Y:H:i:s O';
 
-    public function __construct(
-        private readonly LogEntryRepositoryInterface $entryRepository
-    ) {
-    }
-
     /**
      * @param string[] $lineData
      */
-    public function convert(array $lineData): ?LogEntryInterface
+    public function convert(array $lineData): ?LogEntry
     {
-        $logEntry = $this->entryRepository->newEntry();
-
         $timestamp = DateTimeImmutable::createFromFormat(self::LOG_DATE_TIME_FORMAT, $lineData[2]);
         if (!$timestamp) {
             return null;
         }
 
-        $logEntry->setServiceName($lineData[1]);
-        $logEntry->setTimestamp($timestamp);
-        $logEntry->setBody($lineData[3]);
-        $logEntry->setCode($lineData[4]);
-
-        return $logEntry;
+        return new LogEntry(
+            $lineData[1],
+            $timestamp,
+            $lineData[3],
+            $lineData[4]
+        );
     }
 }

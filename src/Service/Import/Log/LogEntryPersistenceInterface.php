@@ -9,8 +9,8 @@ use Exception;
 interface LogEntryPersistenceInterface
 {
     /**
-     * @param LogEntryInterface[] $entries
+     * @param LogEntry[] $entries
      * @throws Exception
      */
-    public function persist(LogFileInterface $file, array $entries): void;
+    public function persist(LogFile $file, array $entries): void;
 }
