@@ -1,5 +1,6 @@
 # Log analytics
-Import logs into database and introduce `/api/count` endpoint for fetching log entries count based on given criteria.
+Import logs into database and introduces `/api/count` endpoint for fetching log entries count based on given criteria.
+Log data rows imported iterative by cron schedule. For testing purposes the cron schedule is set to every minute.
 
 ## Setup
 ### Requirements
@@ -19,19 +20,21 @@ Import logs into database and introduce `/api/count` endpoint for fetching log e
 
 ## Logs import
 Import log entries is performing by cron schedule (in the `scheduler` container).
+
 Import process can be run manually:
 ```shell
 make ssh
 bin/console log-analytics:import-logs --filePath=<path/to/log/file/in/container>
 ```
 
-For sample file the CLI command would be:
+For the sample file (`import/logs.log`) the CLI command is:
 ```shell
 bin/console log-analytics:import-logs --filePath=/var/www/html/import/logs.log
 ```
 
 ## Count API
 Count API endpoint available by url: `http://localhost/api/count`
+
 Example curl call:
 ```shell
 curl --header 'Accept: application/json' 'http://localhost/api/count?serviceNames[]=USER-SERVICE&startDate=2018-08-17%2009%3A23%3A00&endDate=2018-08-17%2009%3A27%3A00&statusCode=201'
