@@ -15,6 +15,9 @@ class Converter implements ConverterInterface
     ) {
     }
 
+    /**
+     * @param string[] $lineData
+     */
     public function convert(array $lineData): ?LogEntryInterface
     {
         $logEntry = $this->entryRepository->newEntry();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Import;
 
 use App\Service\Import\Log\ConverterInterface;
+use App\Service\Import\Log\LogEntryInterface;
 use App\Service\Import\Log\LogEntryPersistenceInterface;
 use App\Service\Import\Log\LogEntryRepositoryInterface;
 use App\Service\Import\Log\LogFileInterface;
@@ -35,7 +36,11 @@ class LogsImport implements LogsImportInterface
     ): ImportResult {
         $file = $this->getFile($filePath);
 
-        return $this->doImport($file, $file->getCurrentPosition(), $pageSize);
+        return $this->doImport(
+            $file,
+            $file->getCurrentPosition() ?? 0,
+            $pageSize
+        );
     }
 
     public function importPage(
@@ -111,6 +116,9 @@ class LogsImport implements LogsImportInterface
         return new FileReader($handle, $offset, $pageSize);
     }
 
+    /**
+     * @return LogEntryInterface[]
+     */
     private function readNewEntries(FileReader $reader): array
     {
         $entries = [];

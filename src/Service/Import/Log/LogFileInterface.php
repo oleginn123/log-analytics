@@ -6,9 +6,9 @@ namespace App\Service\Import\Log;
 
 interface LogFileInterface
 {
-    public function getPath(): ?string;
+    public function getPath(): string;
 
-    public function getTempPath(): ?string;
+    public function getTempPath(): string;
 
     public function setTempPath(string $temp_path): static;
 

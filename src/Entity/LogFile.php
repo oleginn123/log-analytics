@@ -32,9 +32,9 @@ class LogFile implements LogFileInterface
         return $this->id;
     }
 
-    public function getPath(): ?string
+    public function getPath(): string
     {
-        return $this->path;
+        return $this->path ?? '';
     }
 
     public function setPath(string $path): static
@@ -44,9 +44,9 @@ class LogFile implements LogFileInterface
         return $this;
     }
 
-    public function getTempPath(): ?string
+    public function getTempPath(): string
     {
-        return $this->temp_path;
+        return $this->temp_path ?? '';
     }
 
     public function setTempPath(string $temp_path): static
