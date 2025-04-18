@@ -38,10 +38,10 @@ class LogFileRepository extends ServiceEntityRepository implements LogFileReposi
         }
 
         return new LogFileDto(
-            $logFile->getPath(),
-            $logFile->getTempPath(),
-            $logFile->getCurrentPosition(),
-            $logFile->isEof()
+            $logFile->getPath() ?? '',
+            $logFile->getTempPath() ?? '',
+            $logFile->getCurrentPosition() ?? 0,
+            $logFile->isEof() ?? false
         );
     }
 

@@ -38,7 +38,7 @@ class LogsImport implements LogsImportInterface
 
         return $this->doImport(
             $file,
-            $file->getCurrentPosition() ?? 0,
+            $file->getCurrentPosition(),
             $pageSize
         );
     }
@@ -120,6 +120,7 @@ class LogsImport implements LogsImportInterface
     private function readNewEntries(FileReader $reader): array
     {
         $entries = [];
+        /** @var string $line */
         foreach ($reader as $line) {
             $parsed = $this->parser->parseLine($line);
             if ($parsed === null) {

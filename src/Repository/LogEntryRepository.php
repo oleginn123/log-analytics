@@ -27,10 +27,6 @@ class LogEntryRepository extends ServiceEntityRepository implements LogEntryRepo
 
     public function isExists(LogEntryDto $logEntry): bool
     {
-        if ($logEntry->getTimestamp() === null) {
-            return false;
-        }
-
         return $this->findOneBy(['timestamp' => $logEntry->getTimestamp()]) !== null;
     }
 

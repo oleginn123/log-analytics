@@ -7,10 +7,16 @@ namespace App\Service\Import\Source;
 use IteratorAggregate;
 use Traversable;
 
+/**
+ * @implements IteratorAggregate<int, string>
+ */
 class FileReader implements IteratorAggregate
 {
     private int $currentPosition;
 
+    /**
+     * @param resource $fileHandle
+     */
     public function __construct(
         private $fileHandle,
         private readonly int $offset = 0,

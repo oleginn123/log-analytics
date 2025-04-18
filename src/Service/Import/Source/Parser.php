@@ -8,6 +8,9 @@ class Parser
 {
     private const PATTERN = '/([A-Za-z0-9_\-]+) - - \[([A-Za-z0-9\/\:\+\ ]+)\] "([A-Za-z0-9\/\:\+\.\ ]+)" ([0-9]+)/';
 
+    /**
+     * @return string[]|null
+     */
     public function parseLine(string $line): ?array
     {
         $matches = [];
