@@ -1,0 +1,11 @@
+parameters:
+    tmpDir: /tmp
+    level: 9
+    paths:
+        - config/
+        - public/
+        - src/
+    ignoreErrors:
+        -
+          message: '#Property [a-zA-Z0-9\\_]+::\$id \(int\|null\) is never#'
+          path: src/Entity/*

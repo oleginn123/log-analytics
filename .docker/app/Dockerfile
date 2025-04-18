@@ -22,7 +22,7 @@ EXPOSE 9000
 
 FROM fpm_server as scheduler
 
-RUN echo "* * * * * /var/www/html/bin/console scheduled-task:run" | crontab -u www-data -
+RUN echo "* * * * * /var/www/html/bin/console log-analytics:import-logs --filePath=/var/www/html/import/logs.log" | crontab -u www-data -
 
 ENTRYPOINT []
 
