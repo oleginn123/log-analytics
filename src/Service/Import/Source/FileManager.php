@@ -8,12 +8,16 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class FileManager
 {
+    public function __construct(
+        private readonly Filesystem $filesystem
+    ) {
+    }
+
     public function toTmp(string $filePath): string
     {
         $tmpPath = $this->getTmpFilePath($filePath);
 
-        $filesystem = new Filesystem();
-        $filesystem->copy($filePath, $tmpPath);
+        $this->filesystem->copy($filePath, $tmpPath);
 
         return $tmpPath;
     }

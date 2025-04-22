@@ -12,10 +12,10 @@ use App\Service\Import\Log\LogFile;
 use App\Service\Import\Log\LogFileRepositoryInterface;
 use App\Service\Import\Source\FileManager;
 use App\Service\Import\Source\FileReader;
+use App\Service\Import\Source\FileReaderFactory;
 use App\Service\Import\Source\Parser;
 use Exception;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 
 class LogsImport implements LogsImportInterface
 {
@@ -25,6 +25,7 @@ class LogsImport implements LogsImportInterface
         private readonly LogEntryPersistenceInterface $persistence,
         private readonly ConverterInterface $converter,
         private readonly FileManager $fileManager,
+        private readonly FileReaderFactory $fileReaderFactory,
         private readonly Parser $parser,
         private readonly LoggerInterface $logger
     ) {
@@ -69,7 +70,7 @@ class LogsImport implements LogsImportInterface
         }
 
         try {
-            $reader = $this->getReader($file, $offset, $pageSize);
+            $reader = $this->fileReaderFactory->create($file, $offset, $pageSize);
 
             $toCreate = $this->readNewEntries($reader);
 
@@ -96,22 +97,6 @@ class LogsImport implements LogsImportInterface
                 return $this->fileManager->toTmp($path);
             }
         );
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    private function getReader(
-        LogFile $file,
-        int $offset,
-        int $pageSize = self::DEFAULT_PAGE_SIZE
-    ): FileReader {
-        $handle = @fopen($file->getTempPath(), 'rb');
-        if ($handle === false) {
-            throw new RuntimeException('Could not open file ' . $file->getTempPath() . '.');
-        }
-
-        return new FileReader($handle, $offset, $pageSize);
     }
 
     /**
