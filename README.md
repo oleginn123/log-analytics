@@ -39,3 +39,7 @@ Example curl call:
 ```shell
 curl --header 'Accept: application/json' 'http://localhost/api/count?serviceNames[]=USER-SERVICE&startDate=2018-08-17%2009%3A23%3A00&endDate=2018-08-17%2009%3A27%3A00&statusCode=201'
 ```
+## Automated tests
+```shell
+make test
+```
