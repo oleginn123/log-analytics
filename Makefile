@@ -26,3 +26,6 @@ install:
     fi
 ssh:
 	docker compose -f .docker/docker-compose.yml exec -u www-data app sh
+
+test:
+	docker compose -f .docker/docker-compose.yml exec -u www-data app bin/phpunit
