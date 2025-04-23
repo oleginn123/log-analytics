@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\App\Controller;
 
 use App\Repository\LogEntry\CountSearchCriteria;
-use App\Repository\LogEntryRepository;
+use App\Repository\LogEntryRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -14,7 +14,7 @@ class LogApiControllerTest extends WebTestCase
     private const COUNT = 10;
 
     /**
-     * @var MockObject|LogEntryRepository
+     * @var MockObject|LogEntryRepositoryInterface
      */
     private MockObject $repositoryMock;
 
@@ -22,7 +22,7 @@ class LogApiControllerTest extends WebTestCase
     {
         parent::setUp();
 
-        $this->repositoryMock = $this->createMock(LogEntryRepository::class);
+        $this->repositoryMock = $this->createMock(LogEntryRepositoryInterface::class);
     }
 
     /**
@@ -33,7 +33,7 @@ class LogApiControllerTest extends WebTestCase
         $client = static::createClient();
 
         static::getContainer()
-            ->set(LogEntryRepository::class, $this->repositoryMock);
+            ->set(LogEntryRepositoryInterface::class, $this->repositoryMock);
 
         $this->repositoryMock->expects($this->once())
             ->method('getCount')

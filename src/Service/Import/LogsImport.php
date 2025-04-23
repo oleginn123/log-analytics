@@ -4,36 +4,29 @@ declare(strict_types=1);
 
 namespace App\Service\Import;
 
-use App\Service\Import\Log\ConverterInterface;
 use App\Service\Import\Log\LogEntry;
 use App\Service\Import\Log\LogEntryPersistenceInterface;
-use App\Service\Import\Log\LogEntryRepositoryInterface;
 use App\Service\Import\Log\LogFile;
-use App\Service\Import\Log\LogFileRepositoryInterface;
+use App\Service\Import\Log\ParserInterface;
 use App\Service\Import\Source\FileManager;
-use App\Service\Import\Source\FileReader;
-use App\Service\Import\Source\FileReaderFactory;
-use App\Service\Import\Source\Parser;
-use Exception;
+use App\Service\Import\Source\Reader\ReaderFactory;
+use App\Service\Import\Source\Reader\ReaderInterface;
 use Psr\Log\LoggerInterface;
 
 class LogsImport implements LogsImportInterface
 {
     public function __construct(
-        private readonly LogFileRepositoryInterface $fileRepository,
-        private readonly LogEntryRepositoryInterface $entryRepository,
         private readonly LogEntryPersistenceInterface $persistence,
-        private readonly ConverterInterface $converter,
+        private readonly ParserInterface $parser,
         private readonly FileManager $fileManager,
-        private readonly FileReaderFactory $fileReaderFactory,
-        private readonly Parser $parser,
-        private readonly LoggerInterface $logger
+        private readonly ReaderFactory $readerFactory,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
     public function importNext(
         string $filePath,
-        int $pageSize = self::DEFAULT_PAGE_SIZE
+        int $pageSize = self::DEFAULT_PAGE_SIZE,
     ): ImportResult {
         $file = $this->getFile($filePath);
 
@@ -47,7 +40,7 @@ class LogsImport implements LogsImportInterface
     public function importPage(
         string $filePath,
         int $offset,
-        int $pageSize = self::DEFAULT_PAGE_SIZE
+        int $pageSize = self::DEFAULT_PAGE_SIZE,
     ): ImportResult {
         return $this->doImport(
             $this->getFile($filePath),
@@ -61,7 +54,7 @@ class LogsImport implements LogsImportInterface
         LogFile $file,
         int $offset,
         int $pageSize = self::DEFAULT_PAGE_SIZE,
-        bool $isUpdateFileState = true
+        bool $isUpdateFileState = true,
     ): ImportResult {
         if ($file->isEof()) {
             $file->setTempPath(
@@ -70,7 +63,7 @@ class LogsImport implements LogsImportInterface
         }
 
         try {
-            $reader = $this->fileReaderFactory->create($file, $offset, $pageSize);
+            $reader = $this->readerFactory->create($file, $offset, $pageSize);
 
             $toCreate = $this->readNewEntries($reader);
 
@@ -80,7 +73,7 @@ class LogsImport implements LogsImportInterface
             }
 
             $this->persistence->persist($file, $toCreate);
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
 
             return new ImportResult(false);
@@ -91,7 +84,7 @@ class LogsImport implements LogsImportInterface
 
     private function getFile(string $filePath): LogFile
     {
-        return $this->fileRepository->getByPathOrCreate(
+        return $this->persistence->getFileByPathOrCreate(
             $filePath,
             function (string $path) {
                 return $this->fileManager->toTmp($path);
@@ -102,18 +95,13 @@ class LogsImport implements LogsImportInterface
     /**
      * @return LogEntry[]
      */
-    private function readNewEntries(FileReader $reader): array
+    private function readNewEntries(ReaderInterface $reader): array
     {
         $entries = [];
         /** @var string $line */
         foreach ($reader as $line) {
-            $parsed = $this->parser->parseLine($line);
-            if ($parsed === null) {
-                continue;
-            }
-
-            $logEntry = $this->converter->convert($parsed);
-            if ($logEntry === null || $this->entryRepository->isExists($logEntry)) {
+            $logEntry = $this->parser->parseLineAndConvert($line);
+            if (null === $logEntry || $this->persistence->isEntryExists($logEntry)) {
                 continue;
             }
 

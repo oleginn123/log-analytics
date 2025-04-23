@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Service\Import\LogsImportInterface;
@@ -17,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ImportLogsCommand extends Command
 {
     public function __construct(
-        private readonly LogsImportInterface $importer
+        private readonly LogsImportInterface $importer,
     ) {
         parent::__construct();
     }
@@ -47,26 +49,26 @@ class ImportLogsCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $filePath = strval($input->getOption('filePath')); // @phpstan-ignore-line
+            $filePath = (string) $input->getOption('filePath');
             if (empty($filePath)) {
                 $io->error('Please specify --filePath option');
 
                 return Command::FAILURE;
             }
 
-            $pageSize = intval($input->getOption('pageSize')); // @phpstan-ignore-line
+            $pageSize = (int) $input->getOption('pageSize');
             $offset = $input->getOption('offset');
 
-            $importResult = $offset === null
+            $importResult = null === $offset
                 ? $this->importer->importNext($filePath, $pageSize)
                 : $this->importer->importPage(
                     $filePath,
-                    intval($offset), // @phpstan-ignore-line
+                    (int) $offset,
                     $pageSize
                 );
 
             if ($importResult->isSuccess()) {
-                $io->success($importResult->getCount() . ' log entries imported into database.');
+                $io->success($importResult->getCount().' log entries imported into database.');
             } else {
                 $io->error('Unable to import log entries');
             }

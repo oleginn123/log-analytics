@@ -29,3 +29,6 @@ ssh:
 
 test:
 	docker compose -f .docker/docker-compose.yml exec -u www-data app bin/phpunit
+
+code-analyse:
+	docker compose -f .docker/docker-compose.yml exec -u www-data app vendor/bin/phpstan analyse -c phpstan.neon

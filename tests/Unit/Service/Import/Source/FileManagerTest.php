@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Service\Import\Source;
 
 use App\Service\Import\Source\FileManager;
+use App\Service\Import\Source\FileSystemInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Symfony\Component\Filesystem\Filesystem;
 
 class FileManagerTest extends TestCase
 {
@@ -18,7 +18,7 @@ class FileManagerTest extends TestCase
     private FileManager $fileManager;
 
     /**
-     * @var Filesystem|MockObject
+     * @var FileSystemInterface|MockObject
      */
     private MockObject $filesystemMock;
 
@@ -26,7 +26,7 @@ class FileManagerTest extends TestCase
     {
         parent::setUp();
 
-        $this->filesystemMock = $this->createMock(Filesystem::class);
+        $this->filesystemMock = $this->createMock(FileSystemInterface::class);
         $this->fileManager = new FileManager($this->filesystemMock);
     }
 

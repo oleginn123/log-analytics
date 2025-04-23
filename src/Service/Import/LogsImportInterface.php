@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service\Import;
 
@@ -8,12 +10,12 @@ interface LogsImportInterface
 
     public function importNext(
         string $filePath,
-        int $pageSize = self::DEFAULT_PAGE_SIZE
-    ): ImportResult;
+        int $pageSize = self::DEFAULT_PAGE_SIZE,
+    ): ImportResultInterface;
 
     public function importPage(
         string $filePath,
         int $offset,
-        int $pageSize = self::DEFAULT_PAGE_SIZE
-    ): ImportResult;
+        int $pageSize = self::DEFAULT_PAGE_SIZE,
+    ): ImportResultInterface;
 }

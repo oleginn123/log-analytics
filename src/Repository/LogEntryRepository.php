@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\LogEntry;
 use App\Repository\LogEntry\CountSearchCriteria;
-use App\Service\Import\Log\LogEntry as LogEntryDto;
-use App\Service\Import\Log\LogEntryRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -25,24 +25,13 @@ class LogEntryRepository extends ServiceEntityRepository implements LogEntryRepo
             ->count();
     }
 
-    public function isExists(LogEntryDto $logEntry): bool
-    {
-        return $this->findOneBy(['timestamp' => $logEntry->getTimestamp()]) !== null;
-    }
-
     /**
-     * @param LogEntryDto[] $entries
+     * @param LogEntry[] $logEntries
      */
-    public function createEntries(array $entries): void
+    public function saveMultiple(array $logEntries): void
     {
-        foreach ($entries as $entry) {
-            $this->getEntityManager()->persist(
-                (new LogEntry())
-                    ->setServiceName($entry->getServiceName())
-                    ->setBody($entry->getBody())
-                    ->setTimestamp($entry->getTimestamp())
-                    ->setCode($entry->getCode())
-            );
+        foreach ($logEntries as $entry) {
+            $this->getEntityManager()->persist($entry);
         }
 
         $this->getEntityManager()->flush();

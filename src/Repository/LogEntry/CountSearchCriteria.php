@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Repository\LogEntry;
 
-use DateTimeImmutable;
 use Doctrine\Common\Collections\Criteria;
 use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\AtLeastOneOf;
@@ -15,7 +14,7 @@ use Symfony\Component\Validator\Constraints\Type;
 class CountSearchCriteria
 {
     /**
-     * @param null|array<string> $serviceNames
+     * @param array<string>|null $serviceNames
      */
     public function __construct(
         #[Type('array')]
@@ -34,25 +33,25 @@ class CountSearchCriteria
     {
         $criteria = Criteria::create();
 
-        if ($this->serviceNames !== null) {
+        if (null !== $this->serviceNames) {
             $criteria->andWhere(
                 Criteria::expr()->in('service_name', $this->serviceNames)
             );
         }
 
-        if ($this->startDate !== null) {
+        if (null !== $this->startDate) {
             $criteria->andWhere(
-                Criteria::expr()->gte('timestamp', DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->startDate))
+                Criteria::expr()->gte('timestamp', \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->startDate))
             );
         }
 
-        if ($this->endDate !== null) {
+        if (null !== $this->endDate) {
             $criteria->andWhere(
-                Criteria::expr()->lte('timestamp', DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->endDate))
+                Criteria::expr()->lte('timestamp', \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->endDate))
             );
         }
 
-        if ($this->statusCode !== null) {
+        if (null !== $this->statusCode) {
             $criteria->andWhere(
                 Criteria::expr()->eq('code', $this->statusCode)
             );

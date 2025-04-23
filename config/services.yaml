@@ -12,10 +12,10 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
             App\Service\Import\LogsImportInterface: '@App\Service\Import\LogsImport'
-            App\Service\Import\Log\ConverterInterface: '@App\Service\Import\Log\Converter'
+            App\Service\Import\Log\ParserInterface: '@App\Service\Import\Source\Parser'
+            App\Repository\LogEntryRepositoryInterface: '@App\Repository\LogEntryRepository'
             App\Service\Import\Log\LogEntryPersistenceInterface: '@App\Repository\LogEntryPersistence'
-            App\Service\Import\Log\LogEntryRepositoryInterface: '@App\Repository\LogEntryRepository'
-            App\Service\Import\Log\LogFileRepositoryInterface: '@App\Repository\LogFileRepository'
+            App\Service\Import\Source\FileSystemInterface: '@App\Filesystem\Filesystem'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
