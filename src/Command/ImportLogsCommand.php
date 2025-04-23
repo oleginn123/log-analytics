@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ImportLogsCommand extends Command
 {
     public function __construct(
-        private readonly LogsImportInterface $importer
+        private readonly LogsImportInterface $importer,
     ) {
         parent::__construct();
     }
@@ -59,7 +59,7 @@ class ImportLogsCommand extends Command
             $pageSize = (int) $input->getOption('pageSize');
             $offset = $input->getOption('offset');
 
-            $importResult = $offset === null
+            $importResult = null === $offset
                 ? $this->importer->importNext($filePath, $pageSize)
                 : $this->importer->importPage(
                     $filePath,
@@ -68,7 +68,7 @@ class ImportLogsCommand extends Command
                 );
 
             if ($importResult->isSuccess()) {
-                $io->success($importResult->getCount() . ' log entries imported into database.');
+                $io->success($importResult->getCount().' log entries imported into database.');
             } else {
                 $io->error('Unable to import log entries');
             }

@@ -16,11 +16,11 @@ class ReaderFactory
     public function create(
         LogFile $file,
         int $offset,
-        int $pageSize = LogsImportInterface::DEFAULT_PAGE_SIZE
+        int $pageSize = LogsImportInterface::DEFAULT_PAGE_SIZE,
     ): ReaderInterface {
         $handle = fopen($file->getTempPath(), 'rb');
-        if ($handle === false) {
-            throw new ReaderException('Could not open file ' . $file->getTempPath() . '.');
+        if (false === $handle) {
+            throw new ReaderException('Could not open file '.$file->getTempPath().'.');
         }
 
         return new FileReader($handle, $offset, $pageSize);

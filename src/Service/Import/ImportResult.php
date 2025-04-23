@@ -8,7 +8,7 @@ final class ImportResult implements ImportResultInterface
 {
     public function __construct(
         private readonly bool $isSuccess = true,
-        private readonly int $recordsCount = 0
+        private readonly int $recordsCount = 0,
     ) {
     }
 

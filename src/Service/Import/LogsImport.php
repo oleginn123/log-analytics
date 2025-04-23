@@ -9,9 +9,8 @@ use App\Service\Import\Log\LogEntryPersistenceInterface;
 use App\Service\Import\Log\LogFile;
 use App\Service\Import\Log\ParserInterface;
 use App\Service\Import\Source\FileManager;
-use App\Service\Import\Source\Reader\ReaderInterface;
 use App\Service\Import\Source\Reader\ReaderFactory;
-use Exception;
+use App\Service\Import\Source\Reader\ReaderInterface;
 use Psr\Log\LoggerInterface;
 
 class LogsImport implements LogsImportInterface
@@ -21,13 +20,13 @@ class LogsImport implements LogsImportInterface
         private readonly ParserInterface $parser,
         private readonly FileManager $fileManager,
         private readonly ReaderFactory $readerFactory,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
     }
 
     public function importNext(
         string $filePath,
-        int $pageSize = self::DEFAULT_PAGE_SIZE
+        int $pageSize = self::DEFAULT_PAGE_SIZE,
     ): ImportResult {
         $file = $this->getFile($filePath);
 
@@ -41,7 +40,7 @@ class LogsImport implements LogsImportInterface
     public function importPage(
         string $filePath,
         int $offset,
-        int $pageSize = self::DEFAULT_PAGE_SIZE
+        int $pageSize = self::DEFAULT_PAGE_SIZE,
     ): ImportResult {
         return $this->doImport(
             $this->getFile($filePath),
@@ -55,7 +54,7 @@ class LogsImport implements LogsImportInterface
         LogFile $file,
         int $offset,
         int $pageSize = self::DEFAULT_PAGE_SIZE,
-        bool $isUpdateFileState = true
+        bool $isUpdateFileState = true,
     ): ImportResult {
         if ($file->isEof()) {
             $file->setTempPath(
@@ -74,7 +73,7 @@ class LogsImport implements LogsImportInterface
             }
 
             $this->persistence->persist($file, $toCreate);
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
 
             return new ImportResult(false);
@@ -102,7 +101,7 @@ class LogsImport implements LogsImportInterface
         /** @var string $line */
         foreach ($reader as $line) {
             $logEntry = $this->parser->parseLineAndConvert($line);
-            if ($logEntry === null || $this->persistence->isEntryExists($logEntry)) {
+            if (null === $logEntry || $this->persistence->isEntryExists($logEntry)) {
                 continue;
             }
 

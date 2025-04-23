@@ -11,20 +11,20 @@ use App\Service\Import\Log\LogEntry as LogEntryDto;
 use App\Service\Import\Log\LogEntryPersistenceInterface;
 use App\Service\Import\Log\LogFile as LogFileDto;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 
 class LogEntryPersistence implements LogEntryPersistenceInterface
 {
     public function __construct(
         private readonly LogFileRepository $fileRepository,
         private readonly LogEntryRepository $entryRepository,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
     /**
      * @param LogEntryDto[] $entries
-     * @throws Exception
+     *
+     * @throws \Exception
      */
     public function persist(LogFileDto $file, array $entries): void
     {
@@ -48,7 +48,7 @@ class LogEntryPersistence implements LogEntryPersistenceInterface
             $this->updateFile($file);
 
             $connection->commit();
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $connection->rollback();
 
             throw $exception;
@@ -58,13 +58,13 @@ class LogEntryPersistence implements LogEntryPersistenceInterface
     public function getFileByPathOrCreate(string $path, ?callable $getTmpPathCallback = null): LogFileDto
     {
         $logFile = $this->fileRepository->findOneBy(['path' => $path]);
-        if ($logFile === null) {
+        if (null === $logFile) {
             $logFile = new LogFile();
             $logFile->setPath($path);
             $logFile->setCurrentPosition(0);
             $logFile->setIsEof(false);
 
-            if ($getTmpPathCallback !== null) {
+            if (null !== $getTmpPathCallback) {
                 $logFile->setTempPath($getTmpPathCallback($path));
             }
 
@@ -81,14 +81,14 @@ class LogEntryPersistence implements LogEntryPersistenceInterface
 
     public function isEntryExists(LogEntryDto $logEntry): bool
     {
-        return $this->entryRepository->findOneBy(['timestamp' => $logEntry->getTimestamp()]) !== null;
+        return null !== $this->entryRepository->findOneBy(['timestamp' => $logEntry->getTimestamp()]);
     }
 
     private function updateFile(LogFileDto $file): void
     {
         $logFile = $this->fileRepository->findOneBy(['path' => $file->getPath()]);
-        if ($logFile === null) {
-            throw new NotExistsException('LogFile entity with path = ' . $file->getPath() .  ' doesn\'t exists');
+        if (null === $logFile) {
+            throw new NotExistsException('LogFile entity with path = '.$file->getPath().' doesn\'t exists');
         }
 
         $logFile->setPath($file->getPath());

@@ -6,7 +6,6 @@ namespace App\Service\Import\Source;
 
 use App\Service\Import\Log\LogEntry;
 use App\Service\Import\Log\ParserInterface;
-use DateTimeImmutable;
 
 final class Parser implements ParserInterface
 {
@@ -30,11 +29,11 @@ final class Parser implements ParserInterface
     public function parseLineAndConvert(string $line): ?LogEntry
     {
         $lineData = $this->parseLine($line);
-        if ($lineData === null) {
+        if (null === $lineData) {
             return null;
         }
 
-        $timestamp = DateTimeImmutable::createFromFormat(self::LOG_DATE_TIME_FORMAT, $lineData[2]);
+        $timestamp = \DateTimeImmutable::createFromFormat(self::LOG_DATE_TIME_FORMAT, $lineData[2]);
         if (!$timestamp) {
             return null;
         }

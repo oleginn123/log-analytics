@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Service\Import\Source\Reader;
 
-use Traversable;
-
 final class FileReader implements ReaderInterface
 {
     private int $currentPosition;
@@ -16,12 +14,12 @@ final class FileReader implements ReaderInterface
     public function __construct(
         private $fileHandle,
         private readonly int $offset = 0,
-        private readonly int $pageSize = 100
+        private readonly int $pageSize = 100,
     ) {
         $this->currentPosition = $offset;
     }
 
-    public function getIterator(): Traversable
+    public function getIterator(): \Traversable
     {
         fseek($this->fileHandle, $this->offset);
 
@@ -30,7 +28,7 @@ final class FileReader implements ReaderInterface
             && $linesCounter <= $this->pageSize
         ) {
             $this->currentPosition += strlen($line);
-            $linesCounter++;
+            ++$linesCounter;
 
             yield $line;
         }

@@ -14,14 +14,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class LogApiController extends AbstractController
 {
     public function __construct(
-        private readonly LogEntryRepositoryInterface $repository
+        private readonly LogEntryRepositoryInterface $repository,
     ) {
     }
 
     #[Route('/api/count', methods: ['GET'])]
     public function getCount(
         #[MapQueryString(validationFailedStatusCode: 400)] CountSearchCriteria $criteria
-            = new CountSearchCriteria()
+            = new CountSearchCriteria(),
     ): Response {
         try {
             return $this->json(

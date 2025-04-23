@@ -7,7 +7,7 @@ namespace App\Service\Import\Source;
 class FileManager
 {
     public function __construct(
-        private readonly FileSystemInterface $filesystem
+        private readonly FileSystemInterface $filesystem,
     ) {
     }
 
@@ -22,6 +22,6 @@ class FileManager
 
     private function getTmpFilePath(string $filePath): string
     {
-        return $filePath . '.tmp';
+        return $filePath.'.tmp';
     }
 }
