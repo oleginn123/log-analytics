@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service\Import;
 
-class ImportResult
+final class ImportResult implements ImportResultInterface
 {
     public function __construct(
         private readonly bool $isSuccess = true,

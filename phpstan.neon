@@ -1,6 +1,6 @@
 parameters:
     tmpDir: /tmp
-    level: 9
+    level: 8
     paths:
         - config/
         - public/

@@ -13,12 +13,12 @@ use App\Service\Import\Log\LogFile;
 use App\Service\Import\Log\LogFileRepositoryInterface;
 use App\Service\Import\LogsImport;
 use App\Service\Import\Source\FileManager;
-use App\Service\Import\Source\FileReader;
-use App\Service\Import\Source\FileReaderFactory;
 use App\Service\Import\Source\Parser;
+use App\Service\Import\Source\Reader\FileReader;
+use App\Service\Import\Source\Reader\ReaderFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub\ReturnCallback as ReturnCallbackStub;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 
 class LogsImportTest extends TestCase
@@ -73,7 +73,7 @@ class LogsImportTest extends TestCase
     private MockObject $fileManagerMock;
 
     /**
-     * @var MockObject|FileReaderFactory
+     * @var MockObject|ReaderFactory
      */
     private MockObject $fileReaderFactorMock;
 
@@ -96,7 +96,7 @@ class LogsImportTest extends TestCase
         $this->persistenceMock = $this->createMock(LogEntryPersistenceInterface::class);
         $this->converterMock = $this->createMock(ConverterInterface::class);
         $this->fileManagerMock = $this->createMock(FileManager::class);
-        $this->fileReaderFactorMock = $this->createMock(FileReaderFactory::class);
+        $this->fileReaderFactorMock = $this->createMock(ReaderFactory::class);
         $this->parserMock = $this->createMock(Parser::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 

@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Import\Source;
 
-use Symfony\Component\Filesystem\Filesystem;
-
 class FileManager
 {
     public function __construct(
-        private readonly Filesystem $filesystem
+        private readonly FileSystemInterface $filesystem
     ) {
     }
 

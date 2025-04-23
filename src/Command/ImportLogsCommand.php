@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Service\Import\LogsImportInterface;
@@ -47,21 +49,21 @@ class ImportLogsCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $filePath = strval($input->getOption('filePath')); // @phpstan-ignore-line
+            $filePath = (string) $input->getOption('filePath');
             if (empty($filePath)) {
                 $io->error('Please specify --filePath option');
 
                 return Command::FAILURE;
             }
 
-            $pageSize = intval($input->getOption('pageSize')); // @phpstan-ignore-line
+            $pageSize = (int) $input->getOption('pageSize');
             $offset = $input->getOption('offset');
 
             $importResult = $offset === null
                 ? $this->importer->importNext($filePath, $pageSize)
                 : $this->importer->importPage(
                     $filePath,
-                    intval($offset), // @phpstan-ignore-line
+                    (int) $offset,
                     $pageSize
                 );
 

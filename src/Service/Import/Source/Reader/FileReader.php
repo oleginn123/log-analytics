@@ -2,15 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Import\Source;
+namespace App\Service\Import\Source\Reader;
 
-use IteratorAggregate;
 use Traversable;
 
-/**
- * @implements IteratorAggregate<int, string>
- */
-class FileReader implements IteratorAggregate
+final class FileReader implements ReaderInterface
 {
     private int $currentPosition;
 

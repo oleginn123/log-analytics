@@ -9,11 +9,11 @@ interface LogsImportInterface
     public function importNext(
         string $filePath,
         int $pageSize = self::DEFAULT_PAGE_SIZE
-    ): ImportResult;
+    ): ImportResultInterface;
 
     public function importPage(
         string $filePath,
         int $offset,
         int $pageSize = self::DEFAULT_PAGE_SIZE
-    ): ImportResult;
+    ): ImportResultInterface;
 }
