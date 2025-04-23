@@ -88,7 +88,7 @@ class LogEntryPersistence implements LogEntryPersistenceInterface
     {
         $logFile = $this->fileRepository->findOneBy(['path' => $file->getPath()]);
         if (null === $logFile) {
-            throw new NotExistsException('LogFile entity with path = '.$file->getPath().' doesn\'t exists');
+            throw new NotExistsException('LogFile entity with path = ' . $file->getPath().' doesn\'t exists');
         }
 
         $logFile->setPath($file->getPath());
